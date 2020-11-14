@@ -37,8 +37,7 @@ def standRegres(xArr, yArr):
     return ws
 
 
-# xArr, yArr = loadDataSet('中央空调能耗数据.txt')
-# xArr, yArr = loadDataSet('ex0.txt')
+# xArr, yArr = loadDataSet('../resources/中央空调能耗数据.txt')
 xArr, yArr = loadDataSet('../resources/OLStest.txt')
 
 # 对xArr标准化
