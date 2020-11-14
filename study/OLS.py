@@ -1,10 +1,10 @@
-# 《机器学习实战》
-# 多元线性回归
+# 普通最小二乘法（Ordinary least squares）
 # --------------------------------
-# ---------- 2020.11.03 ----------
+# ---------- 2020.11.14 ----------
 # --------------------------------
+
 from numpy import *
-import matplotlib.pyplot as plt
+import numpy as np
 
 
 # 数据导入函数
@@ -37,25 +37,39 @@ def standRegres(xArr, yArr):
     return ws
 
 
-xArr, yArr = loadDataSet('ex0.txt')
+# xArr, yArr = loadDataSet('中央空调能耗数据.txt')
+# xArr, yArr = loadDataSet('ex0.txt')
+xArr, yArr = loadDataSet('../resources/OLStest.txt')
+
+# 对xArr标准化
+xArr = array(xArr)
+x_mean = xArr.mean(axis=0)
+x_std = xArr.std(axis=0)
+xArr = (xArr - x_mean) / x_std
+# print(xArr)
+
+# 输出xArr行数
+# print(len(mat(xArr)))
+
+# xAdd:[1,1,...,1]
+xAdd = np.ones(len(mat(xArr)))
+# 将xArr添加常数列
+xArr = np.c_[xArr, xAdd]
 
 ws = standRegres(xArr, yArr)
-print(ws)
+# 输出回归系数
+# print(ws)
+
+# 输出回归方程
+y = "y = "
+for i in range(len(ws) - 1):
+    y = y + str(ws[i, 0]) + " * x" + str(i + 1) + " + "
+y = y + str(ws[len(ws) - 1, 0])
+print(y)
 
 xMat = mat(xArr)
 yMat = mat(yArr)
 # 预测值
 yHat = xMat * ws
-
-fig = plt.figure()
-ax = fig.add_subplot(111)
-ax.scatter(xMat[:, 1].flatten().A[0], yMat.T[:, 0].flatten().A[0])
-
-xCopy = xMat.copy()
-xCopy.sort(0)
-yHat = xCopy * ws
-ax.plot(xCopy[:, 1], yHat)
-plt.show()
-
 # 相关系数
 print(corrcoef(yHat.T, yMat))
