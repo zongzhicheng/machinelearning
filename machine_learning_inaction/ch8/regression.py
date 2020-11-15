@@ -59,4 +59,3 @@ plt.show()
 
 # 相关系数
 print(corrcoef(yHat.T, yMat))
- 
