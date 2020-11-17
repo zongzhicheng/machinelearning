@@ -37,25 +37,54 @@ def standRegres(xArr, yArr):
     return ws
 
 
+def lwlr(testPoint, xArr, yArr, k=1.0):
+    xMat = mat(xArr);
+    yMat = mat(yArr).T
+    m = shape(xMat)[0]
+    # 创建对角矩阵
+    weights = mat(eye((m)))
+    for j in range(m):
+        diffMat = testPoint - xMat[j, :]
+        weights[j, j] = exp(diffMat * diffMat.T / (-2.0 * k ** 2))
+    xTx = xMat.T * (weights * xMat)
+    if linalg.det(xTx) == 0.0:
+        print
+        "This matrix is singular, cannot do inverse"
+        return
+    ws = xTx.I * (xMat.T * (weights * yMat))
+    return testPoint * ws
+
+
+def lwlrTest(testArr, xArr, yArr, k=1.0):
+    m = shape(testArr)[0]
+    yHat = zeros(m)
+    for i in range(m):
+        yHat[i] = lwlr(testArr[i], xArr, yArr, k)
+    return yHat
+
+
 xArr, yArr = loadDataSet('ex0.txt')
 
-ws = standRegres(xArr, yArr)
-print(ws)
+# ws = standRegres(xArr, yArr)
+# print(ws)
+#
+# xMat = mat(xArr)
+# yMat = mat(yArr)
+# # 预测值
+# yHat = xMat * ws
+#
+# fig = plt.figure()
+# ax = fig.add_subplot(111)
+# ax.scatter(xMat[:, 1].flatten().A[0], yMat.T[:, 0].flatten().A[0])
+#
+# xCopy = xMat.copy()
+# xCopy.sort(0)
+# yHat = xCopy * ws
+# ax.plot(xCopy[:, 1], yHat)
+# plt.show()
+#
+# yHat = xMat * ws
+# # 相关系数
+# print(corrcoef(yHat.T, yMat))
 
-xMat = mat(xArr)
-yMat = mat(yArr)
-# 预测值
-yHat = xMat * ws
-
-fig = plt.figure()
-ax = fig.add_subplot(111)
-ax.scatter(xMat[:, 1].flatten().A[0], yMat.T[:, 0].flatten().A[0])
-
-xCopy = xMat.copy()
-xCopy.sort(0)
-yHat = xCopy * ws
-ax.plot(xCopy[:, 1], yHat)
-plt.show()
-
-# 相关系数
-print(corrcoef(yHat.T, yMat))
+lwlr(xArr[0], xArr, yArr, 1.0)
