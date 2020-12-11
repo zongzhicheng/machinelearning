@@ -37,6 +37,7 @@ def standRegres(xArr, yArr):
     return ws
 
 
+# 局部加权线性回归函数
 def lwlr(testPoint, xArr, yArr, k=1.0):
     xMat = mat(xArr);
     yMat = mat(yArr).T
@@ -65,26 +66,26 @@ def lwlrTest(testArr, xArr, yArr, k=1.0):
 
 xArr, yArr = loadDataSet('ex0.txt')
 
-# ws = standRegres(xArr, yArr)
-# print(ws)
-#
-# xMat = mat(xArr)
-# yMat = mat(yArr)
-# # 预测值
-# yHat = xMat * ws
-#
-# fig = plt.figure()
-# ax = fig.add_subplot(111)
-# ax.scatter(xMat[:, 1].flatten().A[0], yMat.T[:, 0].flatten().A[0])
-#
-# xCopy = xMat.copy()
-# xCopy.sort(0)
-# yHat = xCopy * ws
-# ax.plot(xCopy[:, 1], yHat)
-# plt.show()
-#
-# yHat = xMat * ws
-# # 相关系数
-# print(corrcoef(yHat.T, yMat))
+ws = standRegres(xArr, yArr)
+print(ws)
 
-lwlr(xArr[0], xArr, yArr, 1.0)
+xMat = mat(xArr)
+yMat = mat(yArr)
+# 预测值
+yHat = xMat * ws
+
+fig = plt.figure()
+ax = fig.add_subplot(111)
+ax.scatter(xMat[:, 1].flatten().A[0], yMat.T[:, 0].flatten().A[0])
+
+xCopy = xMat.copy()
+xCopy.sort(0)
+yHat = xCopy * ws
+ax.plot(xCopy[:, 1], yHat)
+plt.show()
+
+yHat = xMat * ws
+# 相关系数
+print(corrcoef(yHat.T, yMat))
+
+# lwlr(xArr[0], xArr, yArr, 1.0)
