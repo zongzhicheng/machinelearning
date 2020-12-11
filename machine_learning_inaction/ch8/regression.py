@@ -39,7 +39,7 @@ def standRegres(xArr, yArr):
 
 # 局部加权线性回归函数
 def lwlr(testPoint, xArr, yArr, k=1.0):
-    xMat = mat(xArr);
+    xMat = mat(xArr)
     yMat = mat(yArr).T
     m = shape(xMat)[0]
     # 创建对角矩阵
