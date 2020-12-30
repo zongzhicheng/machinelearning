@@ -58,7 +58,7 @@ def file2matrix(filename):
     return returnMat, classLabelVector
 
 
-# 数据归一化
+# min-max标准化
 def autoNum(dataSet):
     minVals = dataSet.min(0)
     maxVals = dataSet.max(0)
