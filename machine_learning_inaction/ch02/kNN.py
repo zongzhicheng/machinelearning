@@ -5,6 +5,8 @@
 # --------------------------------
 from numpy import *
 import operator
+import matplotlib
+import matplotlib.pyplot as plt
 
 
 def createDataSet():
@@ -50,9 +52,21 @@ def file2matrix(filename):
         line = line.strip()
         listFromLine = line.split('\t')
         returnMat[index, :] = listFromLine[0:3]
+        # 索引值-1表示最后一列元素
         classLabelVector.append(int(listFromLine[-1]))
         index += 1
     return returnMat, classLabelVector
+
+
+# 数据归一化
+def autoNum(dataSet):
+    minVals = dataSet.min(0)
+    maxVals = dataSet.max(0)
+    ranges = maxVals - minVals
+    m = dataSet.shape[0]
+    normDataSet = dataSet - tile(minVals, (m, 1))
+    normDataSet = normDataSet / tile(ranges, (m, 1))
+    return normDataSet, ranges, minVals
 
 
 if __name__ == '__main__':
@@ -63,4 +77,19 @@ if __name__ == '__main__':
     print(classify0([1.0, 1.2], group, labels, 3))  # 输出：A
 
     # 示例：使用k-近邻算法改进约会网站的配对效果
-    returnMat, classLabelVector = file2matrix('datingTestSet2.txt')
+    datingDataMat, datingLabels = file2matrix('datingTestSet2.txt')
+    print(datingDataMat)
+
+    # 画散点图
+    fig = plt.figure()
+    ax = fig.add_subplot(111)
+    # ax.scatter(datingDataMat[:, 1], datingDataMat[:, 2])
+    ax.scatter(datingDataMat[:, 1], datingDataMat[:, 2],
+               15.0 * array(datingLabels), 15.0 * array(datingLabels))
+    plt.show()
+
+    # 归一化数据
+    normMat, ranges, minVals = autoNum(datingDataMat)
+    print(normMat)
+    print(ranges)
+    print(minVals)
