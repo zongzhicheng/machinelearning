@@ -37,9 +37,30 @@ def classify0(inX, dataSet, labels, k):
     return sortedClassCount[0][0]
 
 
+# 将文本记录转换为Numpy的解析程序
+def file2matrix(filename):
+    fr = open(filename)
+    arrayOfLines = fr.readlines()
+    numberOfLines = len(arrayOfLines)  # 得到文件行数
+    returnMat = zeros((numberOfLines, 3))  # 创建返回的Numpy矩阵
+    classLabelVector = []
+    index = 0
+    # 解析文件数据到列表
+    for line in arrayOfLines:
+        line = line.strip()
+        listFromLine = line.split('\t')
+        returnMat[index, :] = listFromLine[0:3]
+        classLabelVector.append(int(listFromLine[-1]))
+        index += 1
+    return returnMat, classLabelVector
+
+
 if __name__ == '__main__':
     group, labels = createDataSet()
     print(group)
     print(labels)
     print(classify0([0, 0], group, labels, 3))  # 输出：B
     print(classify0([1.0, 1.2], group, labels, 3))  # 输出：A
+
+    # 示例：使用k-近邻算法改进约会网站的配对效果
+    returnMat, classLabelVector = file2matrix('datingTestSet2.txt')
