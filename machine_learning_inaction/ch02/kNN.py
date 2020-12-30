@@ -1,3 +1,8 @@
+# 《机器学习实战》
+# k-近邻算法
+# --------------------------------
+# ---------- 2020.11.03 ----------
+# --------------------------------
 from numpy import *
 import operator
 
@@ -8,6 +13,7 @@ def createDataSet():
     return group, labels
 
 
+# k-近邻算法
 def classify0(inX, dataSet, labels, k):
     dataSetSize = dataSet.shape[0]
     # 欧氏距离计算
