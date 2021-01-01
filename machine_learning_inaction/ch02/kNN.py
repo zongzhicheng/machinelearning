@@ -82,9 +82,10 @@ def datingClassTest():
         print("the classifier came back with: %d, the real answer is: %d" % (classifierResult, datingLabels[i]))
         if (classifierResult != datingLabels[i]):
             errorCount += 1.0
-        print("the total error rate is: %f" % (errorCount / float(numTestVecs)))
+    print("the total error rate is: %f" % (errorCount / float(numTestVecs)))
 
 
+# 约会网站预测函数
 def classifyPerson():
     resultList = ['not at all', 'in small doses', 'in large doses']
     percentTats = float(input("percentage of time spent playing video games?"))
