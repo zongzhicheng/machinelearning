@@ -18,6 +18,7 @@ def createDataSet():
 
 
 # k-近邻算法
+# 输入参数：用于分类的输入向量inX、输入的训练样本集dataSet、标签向量labels、参数k表示选择最近邻居的数目
 def classify0(inX, dataSet, labels, k):
     dataSetSize = dataSet.shape[0]
     # 欧氏距离计算
