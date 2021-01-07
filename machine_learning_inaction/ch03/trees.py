@@ -71,13 +71,41 @@ def chooseBestFeatureToSplit(dataSet):
     return bestFeature
 
 
+# 类似于kNN中classif0部分的投票表决代码
+# 当递归创建树使用完了所有特征，仍不能将数据集划分成仅包含唯一类别的分组
+# 则采用该函数挑选出现次数最多的类别作为返回值
 def majorityCnt(classList):
     classCount = {}
     for vote in classList:
-        if vote not in classCount.keys(): classCount[vote] = 0
+        if vote not in classCount.keys():
+            classCount[vote] = 0
         classCount[vote] += 1
     sortedClassCount = sorted(classCount.iteritems(), key=operator.itemgetter(1), reverse=True)
     return sortedClassCount[0][0]
+
+
+# 创建树的函数代码
+def createTree(dataSet, labels):
+    # 数据集所有的类标签
+    classList = [example[-1] for example in dataSet]
+    # count函数统计元素在列表出现次数
+    # 类别完全相同则停止继续划分
+    if classList.count(classList[0]) == len(classList):
+        return classList[0]
+    # 遍历完所有特征时返回出现次数最多的类别
+    if len(dataSet[0]) == 1:
+        return majorityCnt(classList)
+    bestFeat = chooseBestFeatureToSplit(dataSet)
+    bestFeatLabel = labels[bestFeat]
+    myTree = {bestFeatLabel: {}}
+    del (labels[bestFeat])
+    # 得到列表包含的所有属性值
+    featValues = [example[bestFeat] for example in dataSet]
+    uniqueVals = set(featValues)
+    for value in uniqueVals:
+        subLabels = labels[:]
+        myTree[bestFeatLabel][value] = createTree(splitDataSet(dataSet, bestFeat, value), subLabels)
+    return myTree
 
 
 if __name__ == '__main__':
@@ -89,3 +117,6 @@ if __name__ == '__main__':
     print(splitDataSet(myDat, 0, 0))
 
     print(chooseBestFeatureToSplit(myDat))
+
+    myTree = createTree(myDat, lables)
+    print(myTree)
