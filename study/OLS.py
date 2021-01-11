@@ -29,6 +29,7 @@ def standRegres(xArr, yArr):
     yMat = mat(yArr).T
     xTx = xMat.T * xMat
     # 计算行列式是否为零，如果为零，那么计算逆矩阵的时候将出现错误
+    # 行列式如果某两行（列）元素同比例，则行列式等于0
     if linalg.det(xTx) == 0.0:
         print("This matrix is singular, cannot do inverse")
         return
@@ -37,16 +38,19 @@ def standRegres(xArr, yArr):
     return ws
 
 
-# xArr, yArr = loadDataSet('../resources/中央空调能耗数据.txt')
-xArr, yArr = loadDataSet('../resources/OLStest.txt')
+xArr, yArr = loadDataSet('../resources/中央空调能耗数据.txt')
+# xArr, yArr = loadDataSet('../resources/OLStest.txt')
 
-# 对xArr标准化
+
 xArr = array(xArr)
+# 删除全为零的列
+idx = np.argwhere(np.all(xArr[..., :] == 0, axis=0))
+xArr = np.delete(xArr, idx, axis=1)
+# 对xArr标准化
 x_mean = xArr.mean(axis=0)
 x_std = xArr.std(axis=0)
 xArr = (xArr - x_mean) / x_std
 # print(xArr)
-
 # 输出xArr行数
 # print(len(mat(xArr)))
 
