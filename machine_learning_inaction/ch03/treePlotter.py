@@ -27,11 +27,11 @@ def createPlot():
 # 获取叶节点的数目
 def getNumLeafs(myTree):
     numLeafs = 0
-    firstStr = myTree.keys()[0]
+    firstStr = list(myTree.keys())[0]
     secondDict = myTree[firstStr]
     for key in secondDict.keys():
-        if type(secondDict[
-                    key]).__name__ == 'dict':  # test to see if the nodes are dictonaires, if not they are leaf nodes
+        # 测试节点的数据类型是否为字典
+        if type(secondDict[key]).__name__ == 'dict':
             numLeafs += getNumLeafs(secondDict[key])
         else:
             numLeafs += 1
@@ -41,17 +41,28 @@ def getNumLeafs(myTree):
 # 获取树的层数
 def getTreeDepth(myTree):
     maxDepth = 0
-    firstStr = myTree.keys()[0]
+    firstStr = list(myTree.keys())[0]
     secondDict = myTree[firstStr]
     for key in secondDict.keys():
-        if type(secondDict[
-                    key]).__name__ == 'dict':  # test to see if the nodes are dictonaires, if not they are leaf nodes
+        if type(secondDict[key]).__name__ == 'dict':
             thisDepth = 1 + getTreeDepth(secondDict[key])
         else:
             thisDepth = 1
-        if thisDepth > maxDepth: maxDepth = thisDepth
+        if thisDepth > maxDepth:
+            maxDepth = thisDepth
     return maxDepth
+
+
+def retrieveTree(i):
+    listOfTrees = [{'no surfacing': {0: 'no', 1: {'flippers': {0: 'no', 1: 'yes'}}}},
+                   {'no surfacing': {0: 'no', 1: {'flippers': {0: {'head': {0: 'no', 1: 'yes'}}, 1: 'no'}}}}
+                   ]
+    return listOfTrees[i]
 
 
 if __name__ == '__main__':
     createPlot()
+    print(retrieveTree(1))
+    myTree = retrieveTree(0)
+    print(getNumLeafs(myTree))
+    print(getTreeDepth(myTree))
