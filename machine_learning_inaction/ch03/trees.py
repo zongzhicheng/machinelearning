@@ -6,6 +6,8 @@
 from math import log
 import operator
 
+from machine_learning_inaction.ch03 import treePlotter
+
 
 def createDataSet():
     dataSet = [[1, 1, 'yes'],
@@ -108,6 +110,34 @@ def createTree(dataSet, labels):
     return myTree
 
 
+# 使用决策树的分类函数
+def classify(inputTree, featLabels, testVec):
+    firstStr = list(inputTree.keys())[0]
+    secondDict = inputTree[firstStr]
+    featIndex = featLabels.index(firstStr)
+    key = testVec[featIndex]
+    valueOfFeat = secondDict[key]
+    if isinstance(valueOfFeat, dict):
+        classLabel = classify(valueOfFeat, featLabels, testVec)
+    else:
+        classLabel = valueOfFeat
+    return classLabel
+
+
+# 使用pickle模块存储决策树
+def storeTree(inputTree, filename):
+    import pickle
+    fw = open(filename, 'wb+')
+    pickle.dump(inputTree, fw)
+    fw.close()
+
+
+def grabTree(filename):
+    import pickle
+    fr = open(filename, "rb+")
+    return pickle.load(fr)
+
+
 if __name__ == '__main__':
     myDat, lables = createDataSet()
     print(myDat)
@@ -120,3 +150,12 @@ if __name__ == '__main__':
 
     myTree = createTree(myDat, lables)
     print(myTree)
+
+    myDat, lables = createDataSet()
+    myTree = treePlotter.retrieveTree(0)
+    print(classify(myTree, lables, [1, 0]))
+    print(classify(myTree, lables, [1, 1]))
+
+    storeTree(myTree, 'classifierStorage.txt')
+    print(grabTree('classifierStorage.txt'))
+
