@@ -4,12 +4,13 @@
 # ---------- 2021.1.14 ----------
 # --------------------------------
 from numpy import *
+import matplotlib.pyplot as plt
 
 
 def loadDataSet(fileName, delim='\t'):
     fr = open(fileName)
     stringArr = [line.strip().split(delim) for line in fr.readlines()]
-    datArr = [map(float, line) for line in stringArr]
+    datArr = [list(map(float, line)) for line in stringArr]
     return mat(datArr)
 
 
@@ -37,3 +38,9 @@ def pca(dataMat, topNfeat=9999999):
 if __name__ == '__main__':
     dataMat = loadDataSet('testSet.txt')
     lowMat, reconMat = pca(dataMat, 1)
+    flg = plt.figure()
+    ax = flg.add_subplot(111)
+    ax.scatter(dataMat[:, 0].flatten().A[0], dataMat[:, 1].flatten().A[0], marker='^', s=90)
+    ax.scatter(reconMat[:, 0].flatten().A[0], reconMat[:, 1].flatten().A[0], marker='o', s=50, c='red')
+    plt.show()
+
