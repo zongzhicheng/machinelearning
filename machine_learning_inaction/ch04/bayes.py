@@ -43,4 +43,3 @@ if __name__ == '__main__':
     myVocalList = createVocabList(listOPosts)
     print(myVocalList)
     print(setOfWords2Vec(myVocalList, listOPosts[0]))
-    print(setOfWords2Vec(myVocalList, listOPosts[3]))
