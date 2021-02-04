@@ -30,6 +30,7 @@ def classify0(inX, dataSet, labels, k):
     sqDistances = sqDiffMat.sum(axis=1)
     distances = sqDistances ** 0.5
     sortedDistIndicies = distances.argsort()
+    # 定义一个记录类别次数的字典
     classCount = {}
     for i in range(k):
         voteIlabel = labels[sortedDistIndicies[i]]
