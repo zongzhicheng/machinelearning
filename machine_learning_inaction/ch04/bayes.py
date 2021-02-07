@@ -4,6 +4,7 @@
 # ---------- 2021.1.15 ----------
 # --------------------------------
 from numpy import *
+import re
 
 
 # 词表到向量的转换函数
@@ -116,20 +117,68 @@ def bagOfWords2VecMN(vocabList, inputSet):
     return returnVec
 
 
-if __name__ == '__main__':
-    # listOPosts, listClasses = loadDataSet()
-    # myVocalList = createVocabList(listOPosts)
-    # print(myVocalList)
-    # for postinDoc in listOPosts:
-    #     print(postinDoc)
-    #     print(setOfWords2Vec(myVocalList, postinDoc))
+# 将字符串转换为字符列表
+def textParse(bigString):
+    # 将特殊符号作为切分标志进行字符串切分，即非字母、非数字
+    listOfTokens = re.split(r'\W*', bigString)
+    # 除了单个字母，例如大写的I，其它单词变成小写
+    return [tok.lower() for tok in listOfTokens if len(tok) > 2]
 
-    # trainMat = []
-    # for postinDoc in listOPosts:
-    #     trainMat.append(setOfWords2Vec(myVocalList, postinDoc))
-    # p0V, p1V, pAb = trainNB0(trainMat, listClasses)
-    # print(pAb)  # 文档属于侮辱类的概率P(c1)
-    # print(p0V)  # 所有侮辱类文档中每个单词出现的概率，即P(wi|c1)
-    # print(p1V)  # 所有非侮辱类文档中每个单词出现的概率P，即(wi|c0)
+
+# 垃圾邮件测试函数
+def spamTest():
+    docList = []
+    classList = []
+    fullText = []
+    for i in range(1, 26):
+        wordList = textParse(open('email/spam/%d.txt' % i).read())
+        docList.append(wordList)
+        fullText.extend(wordList)
+        classList.append(1)
+        wordList = textParse(open('email/ham/%d.txt' % i).read())
+        docList.append(wordList)
+        fullText.extend(wordList)
+        classList.append(0)
+    vocabList = createVocabList(docList)  # create vocabulary
+    trainingSet = range(50);
+    testSet = []  # create test set
+    for i in range(10):
+        randIndex = int(random.uniform(0, len(trainingSet)))
+        testSet.append(trainingSet[randIndex])
+        del (trainingSet[randIndex])
+    trainMat = []
+    trainClasses = []
+    for docIndex in trainingSet:  # train the classifier (get probs) trainNB0
+        trainMat.append(bagOfWords2VecMN(vocabList, docList[docIndex]))
+        trainClasses.append(classList[docIndex])
+    p0V, p1V, pSpam = trainNB0(array(trainMat), array(trainClasses))
+    errorCount = 0
+    for docIndex in testSet:  # classify the remaining items
+        wordVector = bagOfWords2VecMN(vocabList, docList[docIndex])
+        if classifyNB(array(wordVector), p0V, p1V, pSpam) != classList[docIndex]:
+            errorCount += 1
+            print
+            "classification error", docList[docIndex]
+    print('the error rate is: ', float(errorCount) / len(testSet))
+    # return vocabList,fullText
+
+
+if __name__ == '__main__':
+    """
+    listOPosts, listClasses = loadDataSet()
+    myVocalList = createVocabList(listOPosts)
+    print(myVocalList)
+    for postinDoc in listOPosts:
+        print(postinDoc)
+        print(setOfWords2Vec(myVocalList, postinDoc))
+
+    trainMat = []
+    for postinDoc in listOPosts:
+        trainMat.append(setOfWords2Vec(myVocalList, postinDoc))
+    p0V, p1V, pAb = trainNB0(trainMat, listClasses)
+    print(pAb)  # 文档属于侮辱类的概率P(c1)
+    print(p0V)  # 所有侮辱类文档中每个单词出现的概率，即P(wi|c1)
+    print(p1V)  # 所有非侮辱类文档中每个单词出现的概率P，即(wi|c0)
+    """
 
     testingNB()
