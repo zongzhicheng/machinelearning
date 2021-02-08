@@ -120,7 +120,7 @@ def bagOfWords2VecMN(vocabList, inputSet):
 # 将字符串转换为字符列表
 def textParse(bigString):
     # 将特殊符号作为切分标志进行字符串切分，即非字母、非数字
-    listOfTokens = re.split(r'\W*', bigString)
+    listOfTokens = re.split(r'\\W*', bigString)
     # 除了单个字母，例如大写的I，其它单词变成小写
     return [tok.lower() for tok in listOfTokens if len(tok) > 2]
 
@@ -130,37 +130,70 @@ def spamTest():
     docList = []
     classList = []
     fullText = []
+    # 遍历25个文件
     for i in range(1, 26):
-        wordList = textParse(open('email/spam/%d.txt' % i).read())
+        # 读取每个垃圾邮件，并字符串转换成字符串列表
+        wordList = textParse(open('email/spam/%d.txt' % i, 'r').read())
+        # append和extend区别
+        """
+        >>> li = ['a', 'b', 'c']  
+        >>> li.extend(['d', 'e', 'f'])   
+        >>> li  
+        ['a', 'b', 'c', 'd', 'e', 'f']  
+        """
+        """
+        >>> li = ['a', 'b', 'c']  
+        >>> li.append(['d', 'e', 'f'])   
+        >>> li  
+        ['a', 'b', 'c', ['d', 'e', 'f']]  
+        """
         docList.append(wordList)
         fullText.extend(wordList)
+        # 标记垃圾邮件，1表示垃圾文件
         classList.append(1)
-        wordList = textParse(open('email/ham/%d.txt' % i).read())
+        # 读取每个非垃圾邮件，并字符串转换成字符串列表
+        wordList = textParse(open('email/ham/%d.txt' % i, 'r').read())
         docList.append(wordList)
         fullText.extend(wordList)
+        # 标记非垃圾邮件，0表示非垃圾文件
         classList.append(0)
-    vocabList = createVocabList(docList)  # create vocabulary
-    trainingSet = range(50);
-    testSet = []  # create test set
+    # 创建词汇表，不重复
+    vocabList = createVocabList(docList)
+    # 创建存储训练集的索引值的列表
+    trainingSet = list(range(50))
+    # 创建测试集的索引值的列表
+    testSet = []
+    # 从50个邮件中，随机挑选出40个作为训练集,10个做测试集
     for i in range(10):
+        # 随机选取索索引值
         randIndex = int(random.uniform(0, len(trainingSet)))
+        # 添加测试集的索引值
         testSet.append(trainingSet[randIndex])
+        # 在训练集列表中删除添加到测试集的索引值
         del (trainingSet[randIndex])
+    # 创建训练集矩阵
     trainMat = []
+    # 创建训练集类别标签系向量
     trainClasses = []
-    for docIndex in trainingSet:  # train the classifier (get probs) trainNB0
+    # 遍历训练集
+    for docIndex in trainingSet:
+        # 将生成的词集模型添加到训练矩阵中
         trainMat.append(bagOfWords2VecMN(vocabList, docList[docIndex]))
+        # 将类别添加到训练集类别标签系向量中
         trainClasses.append(classList[docIndex])
+    # 训练朴素贝叶斯模型
     p0V, p1V, pSpam = trainNB0(array(trainMat), array(trainClasses))
+    # 错误分类计数
     errorCount = 0
-    for docIndex in testSet:  # classify the remaining items
+    # 遍历测试集
+    for docIndex in testSet:
+        # 测试集的词集模型
         wordVector = bagOfWords2VecMN(vocabList, docList[docIndex])
+        # 如果分类错误
         if classifyNB(array(wordVector), p0V, p1V, pSpam) != classList[docIndex]:
             errorCount += 1
-            print
-            "classification error", docList[docIndex]
-    print('the error rate is: ', float(errorCount) / len(testSet))
-    # return vocabList,fullText
+            print("分类错误的测试集", docList[docIndex])
+    print('错误率: ', float(errorCount) / len(testSet))
 
 
 if __name__ == '__main__':
@@ -182,3 +215,5 @@ if __name__ == '__main__':
     """
 
     testingNB()
+
+    spamTest()
