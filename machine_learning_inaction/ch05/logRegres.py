@@ -19,7 +19,12 @@ def loadDataSet():
 
 # sigmoid函数
 def sigmoid(inx):
-    return 1.0 / (1 + exp(-inx))
+    # return 1.0 / (1 + exp(-inx))
+    # 对sigmoid函数的优化，避免了出现极大的数据溢出
+    if inx >= 0:
+        return 1.0 / (1 + exp(-inx))
+    else:
+        return exp(inx) / (1 + exp(inx))
 
 
 # Logistic回归梯度上升优化算法
@@ -49,10 +54,10 @@ def plotBestFit(weights):
     ycord2 = []
     for i in range(n):
         if int(labelMat[i]) == 1:
-            xcord1.append(dataArr[i, 1]);
+            xcord1.append(dataArr[i, 1])
             ycord1.append(dataArr[i, 2])
         else:
-            xcord2.append(dataArr[i, 1]);
+            xcord2.append(dataArr[i, 1])
             ycord2.append(dataArr[i, 2])
     fig = plt.figure()
     ax = fig.add_subplot(111)
@@ -98,6 +103,52 @@ def stocGradAscent1(dataMatrix, classLabels, numIter=150):
     return weights
 
 
+def classifyVector(inX, weights):
+    prob = sigmoid(sum(inX * weights))
+    if prob > 0.5:
+        return 1.0
+    else:
+        return 0.0
+
+
+def colicTest():
+    frTrain = open('horseColicTraining.txt')
+    frTest = open('horseColicTest.txt')
+    trainingSet = []
+    trainingLabels = []
+    for line in frTrain.readlines():
+        currLine = line.strip().split('\t')
+        lineArr = []
+        for i in range(len(currLine) - 1):
+            lineArr.append(float(currLine[i]))
+        trainingSet.append(lineArr)
+        trainingLabels.append(float(currLine[-1]))
+    # 使用改进的随机梯度上升算法
+    trainWeights = stocGradAscent1(array(trainingSet), trainingLabels, 500)
+    errorCount = 0
+    numTestVec = 0.0
+    for line in frTest.readlines():
+        numTestVec += 1.0
+        currLine = line.strip().split('\t')
+        lineArr = []
+        for i in range(len(currLine) - 1):
+            lineArr.append(float(currLine[i]))
+        if int(classifyVector(array(lineArr), trainWeights)) != int(currLine[-1]):
+            errorCount += 1
+    # 错误率计算
+    errorRate = (float(errorCount) / numTestVec)
+    print("测试集错误率为：%f" % errorRate)
+    return errorRate
+
+
+def multiTest():
+    numTests = 10
+    errorSum = 0.0
+    for k in range(numTests):
+        errorSum += colicTest()
+    print("经过 %d 次迭代，平均错误率：%f" % (numTests, errorSum / float(numTests)))
+
+
 if __name__ == '__main__':
     dataArr, labelMat = loadDataSet()
     # 梯度上升算法
@@ -114,3 +165,6 @@ if __name__ == '__main__':
     weights = stocGradAscent1(array(dataArr), labelMat)
     print(weights)
     plotBestFit(weights)
+
+    print("---从疝气病预测病马死亡率---")
+    multiTest()
