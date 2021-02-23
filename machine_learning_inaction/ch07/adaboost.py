@@ -107,8 +107,8 @@ def adaBoostTrainDS(dataArr, classLabels, numIt=40):
         # 存储单层决策树
         weakClassArr.append(bestStump)
         print("classEst: ", classEst.T)
-        # 计算e的指数项
         # 为下一次迭代计算D
+        # 计算e的指数项
         expon = multiply(-1 * alpha * mat(classLabels).T, classEst)
         D = multiply(D, exp(expon))
         D = D / D.sum()
@@ -119,9 +119,24 @@ def adaBoostTrainDS(dataArr, classLabels, numIt=40):
         aggErrors = multiply(sign(aggClassEst) != mat(classLabels).T, ones((m, 1)))
         errorRate = aggErrors.sum() / m
         print("total error: ", errorRate)
+        # 误差为0，退出循环
         if errorRate == 0.0:
             break
     return weakClassArr, aggClassEst
+
+
+# AdaBoost分类函数
+def adaClassify(datToClass, classifierArr):
+    dataMatrix = mat(datToClass)
+    m = shape(dataMatrix)[0]
+    aggClassEst = mat(zeros((m, 1)))
+    # 遍历所有分类器，进行分类
+    for i in range(len(classifierArr)):
+        classEst = stumpClassify(dataMatrix, classifierArr[i]['dim'], classifierArr[i]['thresh'],
+                                 classifierArr[i]['ineq'])
+        aggClassEst += classifierArr[i]['alpha'] * classEst
+        print(aggClassEst)
+    return sign(aggClassEst)
 
 
 if __name__ == '__main__':
@@ -132,5 +147,10 @@ if __name__ == '__main__':
     print(bestStump)
     print(minError)
     print(bestClasEst)
+    print("-----adaBoostTrainDS-----")
     classifierArray = adaBoostTrainDS(dataMat, classLabels, 9)
-
+    print(classifierArray)
+    print("-----测试算法：基于AdaBoost的分类-----")
+    dataArr, labelArr = loadSimpData()
+    weakClassArr, aggClassEst = adaBoostTrainDS(dataArr, labelArr, 30)
+    print(adaClassify([0, 0], weakClassArr))
