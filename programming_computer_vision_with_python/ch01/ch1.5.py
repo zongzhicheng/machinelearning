@@ -13,7 +13,7 @@ def denoise(im, U_init, tolerance=0.1, tau=0.125, tv_weight=100):
     Px = im  # 对偶域的x分量
     Py = im  # 对偶域的y分量
     error = 1
-    while (error > tolerance):
+    while error > tolerance:
         Uold = U
 
         # 原始变量的梯度
