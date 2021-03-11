@@ -2,6 +2,7 @@ from PIL import Image
 from pylab import *
 from numpy import *
 from scipy.ndimage import filters
+from scipy.ndimage import measurements, morphology
 
 
 # 灰度图像高斯模糊
@@ -77,8 +78,18 @@ def gaussianFilters():
     show()
 
 
+# 形态学：对象计数
+def morphologyExample():
+    im = array(Image.open('../resource/picture/houses.png').convert('L'))
+    im = 1 * (im < 128)
+
+    labels, nbr_objects = measurements.label(im)
+    print("Number of objects:", nbr_objects)
+
+
 if __name__ == '__main__':
     # gaussianGray()
     # gaussianColor()
     # sobelFilters()
-    gaussianFilters()
+    # gaussianFilters()
+    morphologyExample()
