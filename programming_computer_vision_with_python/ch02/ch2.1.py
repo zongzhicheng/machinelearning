@@ -84,5 +84,5 @@ def plot_harris_points(image, filtered_coords):
 if __name__ == '__main__':
     im = array(Image.open('../resource/picture/empire.jpg').convert('L'))
     harrisim = compute_harris_response(im)
-    filtered_coords = get_harris_points(harrisim, 6, 0.5)
+    filtered_coords = get_harris_points(harrisim, 6, 0.1)
     plot_harris_points(im, filtered_coords)
