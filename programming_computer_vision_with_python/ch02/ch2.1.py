@@ -86,4 +86,3 @@ if __name__ == '__main__':
     harrisim = compute_harris_response(im)
     filtered_coords = get_harris_points(harrisim, 6, 0.01)
     plot_harris_points(im, filtered_coords)
-
