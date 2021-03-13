@@ -83,7 +83,7 @@ def plot_harris_points(image, filtered_coords):
 
 def get_descriptors(image, filtered_coords, wid=5):
     """
-    对于每个返回的点，返回点周围2 * wid + 1个像素的值（假设选点的min_distance > wid）
+    对于每个返回的点，返回点周围 2 * wid + 1 个像素的值（假设选点的min_distance > wid）
     :param image:
     :param filtered_coords:
     :param wid:
