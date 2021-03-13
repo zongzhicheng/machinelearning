@@ -90,6 +90,11 @@ def get_descriptors(image, filtered_coords, wid=5):
     :return:
     """
     desc = []
+    for coords in filtered_coords:
+        patch = image[coords[0] - wid:coords[0] + wid + 1,
+                coords[1] - wid:coords[1] + wid + 1].flatten()
+        desc.append(patch)
+    return desc
 
 
 if __name__ == '__main__':
