@@ -89,6 +89,7 @@ def get_descriptors(image, filtered_coords, wid=5):
     :param wid:
     :return:
     """
+    desc = []
 
 
 if __name__ == '__main__':
