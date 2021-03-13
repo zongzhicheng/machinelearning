@@ -117,7 +117,7 @@ def match(desc1, desc2, threshold=0.5):
             if ncc_value > threshold:
                 d[i, j] = ncc_value
     ndx = argsort(-d)
-    matchscores = ndx[:0]
+    matchscores = ndx[:, 0]
     return matchscores
 
 
