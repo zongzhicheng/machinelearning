@@ -123,6 +123,16 @@ def match(desc1, desc2, threshold=0.5):
     return matchscores
 
 
+def match_twosided(desc1, desc2, threshold=0.5):
+    """
+    两边对称版本的match()
+    :param desc1:
+    :param desc2:
+    :param threshold:
+    :return:
+    """
+
+
 if __name__ == '__main__':
     im = array(Image.open('../resource/picture/empire.jpg').convert('L'))
     harrisim = compute_harris_response(im)
