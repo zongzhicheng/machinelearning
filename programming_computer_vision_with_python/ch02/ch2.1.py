@@ -81,6 +81,14 @@ def plot_harris_points(image, filtered_coords):
     show()
 
 
+# Harris角点检测器
+def main1():
+    im = array(Image.open('../resource/picture/empire.jpg').convert('L'))
+    harrisim = compute_harris_response(im)
+    filtered_coords = get_harris_points(harrisim, 6, 0.1)
+    plot_harris_points(im, filtered_coords)
+
+
 def get_descriptors(image, filtered_coords, wid=5):
     """
     对于每个返回的点，返回点周围2 * wid + 1个像素的值（假设选点的min_distance > wid）
@@ -131,10 +139,87 @@ def match_twosided(desc1, desc2, threshold=0.5):
     :param threshold:
     :return:
     """
+    matches_12 = match(desc1, desc2, threshold)
+    matches_21 = match(desc2, desc1, threshold)
+    ndx_12 = where(matches_12 >= 0)[0]
+
+    # 去除非对称的匹配
+    for n in ndx_12:
+        if matches_21[matches_12[n]] != n:
+            matches_12[n] = -1
+    return matches_12
+
+
+def appendimages(im1, im2):
+    """
+    返回将两幅图像并排拼接成的一幅新图像
+    :param im1:
+    :param im2:
+    :return:
+    """
+    # 选取具有最少行数的图像，然后填充足够的空行
+    rows1 = im1.shape[0]
+    rows2 = im2.shape[0]
+
+    if rows1 < rows2:
+        im1 = concatenate((im1, zeros((rows2 - rows1, im1.shape[1]))), axis=0)
+    elif rows1 > rows2:
+        im2 = concatenate((im1, zeros((rows1 - rows2, im1.shape[1]))), axis=0)
+    # 如果这些情况都没有，那么它们的行数相同，不需要进行填充
+
+    return concatenate((im1, im2), axis=1)
+
+
+def plot_matches(im1, im2, locs1, locs2, matchscores, show_below=True):
+    """
+    显示一幅带有连接匹配之间连线的图片
+    :param im1: 数组图像
+    :param im2: 数组图像
+    :param locs1: 特征位置
+    :param locs2: 特征位置
+    :param matchscores: match()的输出
+    :param show_below: 如果图像应该显示在匹配的下方
+    :return:
+    """
+    im3 = appendimages(im1, im2)
+    if show_below:
+        im3 = vstack((im3, im3))
+
+    imshow(im3)
+    cols1 = im1.shape[1]
+    for i, m in enumerate(matchscores):
+        if m > 0:
+            plot([locs1[i][1], locs2[m][1] + cols1], [locs1[i][0], locs2[m][0]], 'c')
+    axis('off')
+
+
+# 在图像间寻找对应点
+def main2():
+    wid = 5
+    im1 = array(Image.open('../resource/picture/crans_1_small.jpg').convert('L'))
+    im2 = array(Image.open('../resource/picture/crans_2_small.jpg').convert('L'))
+    harrisim = compute_harris_response(im1, 5)
+    filtered_coords1 = get_harris_points(harrisim, wid + 1)
+    d1 = get_descriptors(im1, filtered_coords1, wid)
+
+    harrisim = compute_harris_response(im2, 5)
+    filtered_coords2 = get_harris_points(harrisim, wid + 1)
+    d2 = get_descriptors(im1, filtered_coords2, wid)
+
+    print("starting matching")
+    startTime = time.time()
+    matches = match_twosided(d1, d2)
+    endTime = time.time()
+    print("计算时间：" + str(endTime - startTime))
+
+    figure()
+    gray()
+    plot_matches(im1, im2, filtered_coords1, filtered_coords2, matches)
+    show()
+    print("end")
 
 
 if __name__ == '__main__':
-    im = array(Image.open('../resource/picture/empire.jpg').convert('L'))
-    harrisim = compute_harris_response(im)
-    filtered_coords = get_harris_points(harrisim, 6, 0.1)
-    plot_harris_points(im, filtered_coords)
+    # main1()
+    # 跑了3265秒... 应该用gpu跑
+    main2()
