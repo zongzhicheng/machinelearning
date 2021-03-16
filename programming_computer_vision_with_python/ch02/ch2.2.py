@@ -24,8 +24,10 @@ def process_image(imagename, resultname, params="--edge-thresh 10 --peak-thresh 
         im.save('tmp.pgm')
         imagename = 'tmp.pgm'
 
+    cmmd = str(r"sift.exe " + imagename + " --output=" + resultname + " " + params)
+
     # 此处巨坑 要用win32 而不是win64
-    cmmd = str(r"D:\vlfeat-0.9.20\bin\win32\sift.exe " + imagename + " --output=" + resultname + " " + params)
+    # cmmd = str(r"D:\vlfeat-0.9.20\bin\win32\sift.exe " + imagename + " --output=" + resultname + " " + params)
     os.system(cmmd)
     print('processd', imagename, 'to', resultname)
 
