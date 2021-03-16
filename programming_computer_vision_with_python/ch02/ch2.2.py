@@ -24,6 +24,7 @@ def process_image(imagename, resultname, params="--edge-thresh 10 --peak-thresh 
         im.save('tmp.pgm')
         imagename = 'tmp.pgm'
 
+    # 现在把sift.exe直接加在项目里 这样就可以直接使用了
     cmmd = str(r"sift.exe " + imagename + " --output=" + resultname + " " + params)
 
     # 此处巨坑 要用win32 而不是win64
