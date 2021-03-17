@@ -216,7 +216,6 @@ def main2():
     gray()
     plot_matches(im1, im2, filtered_coords1, filtered_coords2, matches)
     show()
-    print("end")
 
 
 if __name__ == '__main__':
