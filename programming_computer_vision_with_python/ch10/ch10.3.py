@@ -1,4 +1,5 @@
 import cv2
+from numpy import *
 
 
 def videoInput1():
@@ -28,6 +29,25 @@ def videoInput2():
             break
 
 
+def videoReadToNumPy():
+    cap = cv2.VideoCapture(0)
+
+    frames = []
+    # 获取帧，存储到数组中
+    while True:
+        ret, im = cap.read()
+        cv2.imshow('video', im)
+        frames.append(im)
+        if cv2.waitKey(10) == 27:
+            break
+    frames = array(frames)
+
+    # 检查尺寸
+    print(im.shape)
+    print(frames.shape)
+
+
 if __name__ == '__main__':
     # videoInput1()
-    videoInput2()
+    # videoInput2()
+    videoReadToNumPy()
