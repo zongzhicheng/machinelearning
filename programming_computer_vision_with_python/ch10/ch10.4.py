@@ -71,7 +71,12 @@ def main2():
             self.current_frame = 0
 
 
-
+def detect_points(self):
+    """
+    利用子像素精确度在当前帧中检测 "利于跟踪的好的特征（角点）"
+    :param self:
+    :return:
+    """
 
 
 if __name__ == '__main__':
