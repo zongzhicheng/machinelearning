@@ -152,7 +152,7 @@ def main2():
 
     # 选定一些目标点
     tp = array([[264, 538, 540, 264], [40, 36, 605, 605], [1, 1, 1, 1]])
-
+    
     im3 = image_in_image(im1, im2, tp)
 
     figure()
