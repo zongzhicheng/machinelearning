@@ -6,6 +6,7 @@
         <entryData>
           <resourceRoots>
             <path value="file://$PROJECT_DIR$/resources" />
+            <path value="file://$PROJECT_DIR$/programming_computer_vision_with_python/resource" />
           </resourceRoots>
         </entryData>
       </entry>

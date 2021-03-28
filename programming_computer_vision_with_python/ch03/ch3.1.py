@@ -147,8 +147,8 @@ def image_in_image(im1, im2, tp):
 
 def main2():
     # 仿射扭曲im1 到im2 的例子
-    im1 = array(Image.open('../resource/picture/empire.jpg').convert('L'))
-    im2 = array(Image.open('../resource/picture/empire.jpg').convert('L'))
+    im1 = array(Image.open('../resource/picture/beatles.jpg').convert('L'))
+    im2 = array(Image.open('../resource/picture/billboard_for_rent.jpg').convert('L'))
 
     # 选定一些目标点
     tp = array([[264, 538, 540, 264], [40, 36, 605, 605], [1, 1, 1, 1]])
