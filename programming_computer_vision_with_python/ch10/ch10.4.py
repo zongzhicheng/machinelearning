@@ -165,7 +165,8 @@ class LKTracker(object):
 
 
 def main2():
-    imnames = ['1.pgm', '2.pgm', '3.pgm']
+    imnames = ['../resource/picture/bt/bt.003.pgm', '../resource/picture/bt/bt.002.pgm',
+               '../resource/picture/bt/bt.001.pgm', '../resource/picture/bt/bt.000.pgm']
 
     # 创建跟踪对象
     lkt = LKTracker(imnames)
@@ -179,7 +180,9 @@ def main2():
 
 
 def main3():
-    imnames = ['1.ppm', '2.ppm', '3.ppm', '4.ppm']
+    imnames = ['../resource/picture/viff/viff.000.ppm', '../resource/picture/viff/viff.001.ppm',
+               '../resource/picture/viff/viff.002.ppm', '../resource/picture/viff/viff.003.ppm',
+               '../resource/picture/viff/viff.004.ppm']
     # 用LKTracker发生器进行跟踪
     lkt = LKTracker(imnames)
     for im, ft in lkt.track():
@@ -198,16 +201,5 @@ def main3():
 
 if __name__ == '__main__':
     # main1()
-    # main2()
+    main2()
     main3()
-
-    # im1 = Image.open('1.jpg')
-    # im2 = Image.open('2.jpg')
-    # im3 = Image.open('3.jpg')
-    # im4 = Image.open('4.jpg')
-    #
-    #
-    # im1.save('1.pgm')
-    # im2.save('2.pgm')
-    # im3.save('3.pgm')
-    # im4.save('4.pgm')
