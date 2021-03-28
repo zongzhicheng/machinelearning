@@ -71,7 +71,7 @@ def H_from_points(fp, tp):
 
 
 def Haffine_from_points(fp, tp):
-    """ 计算H，仿射变换，使得tp 是fp 经过仿射变换H 得到的"""
+    """ 计算H，仿射变换，使得tp是fp经过仿射变换H得到的"""
 
     if fp.shape != tp.shape:
         raise RuntimeError('number of points do not match')
@@ -96,8 +96,8 @@ def Haffine_from_points(fp, tp):
     A = concatenate((fp_cond[:2], tp_cond[:2]), axis=0)
     U, S, V = linalg.svd(A.T)
 
-    # 如Hartley 和Zisserman 著的Multiple View Geometry in Computer , Scond Edition 所示，
-    # 创建矩阵B 和C
+    # 如Hartley和Zisserman著的Multiple View Geometry in Computer , Scond Edition 所示，
+    # 创建矩阵B和C
     tmp = V[:2].T
     B = tmp[:2]
     C = tmp[2:4]
@@ -112,6 +112,10 @@ def Haffine_from_points(fp, tp):
 
 
 def main1():
+    """
+    图像扭曲
+    :return:
+    """
     im = array(Image.open('../resource/picture/empire.jpg').convert('L'))
     H = array([[1.4, 0.05, -100], [0.05, 1.5, -100], [0, 0, 1]])
     im2 = ndimage.affine_transform(im, H[:2, :2], (H[0, 2], H[1, 2]))
@@ -124,15 +128,14 @@ def main1():
 
 def image_in_image(im1, im2, tp):
     """
-    使用仿射变换将im1 放置在im2 上，使im1 图像的角和tp 尽可能的靠近
-    tp 是齐次表示的，并且是按照从左上角逆时针计算的
+    使用仿射变换将im1放置在im2上，使im1图像的角和tp尽可能的靠近
+    tp是齐次表示的，并且是按照从左上角逆时针计算的
     :param im1:
     :param im2:
     :param tp:
     :return:
     """
     # 扭曲的点
-
     m, n = im1.shape[:2]
     fp = array([[0, m, m, 0], [0, 0, n, n], [1, 1, 1, 1]])
 
@@ -152,7 +155,7 @@ def main2():
 
     # 选定一些目标点
     tp = array([[264, 538, 540, 264], [40, 36, 605, 605], [1, 1, 1, 1]])
-    
+
     im3 = image_in_image(im1, im2, tp)
 
     figure()
