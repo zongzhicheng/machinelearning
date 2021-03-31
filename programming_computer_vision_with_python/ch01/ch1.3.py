@@ -1,5 +1,6 @@
 from PIL import Image
 from pylab import *
+from numpy import *
 
 
 def example1():
@@ -104,13 +105,43 @@ def pca(X):
     return V, S, mean_X
 
 
+def pcaMain():
+    imlist = []
+    for i in range(1, 2360):
+        imlist.append('../resource/picture/fontimages/a_thumbs/%d_t.jpg' % i)
+
+    im = array(Image.open(imlist[0]))  # 打开一幅图像，获取其大小
+    m, n = im.shape[0:2]  # 获取图像的大小
+    imnbr = len(imlist)  # 获取图像的数目
+
+    # 创建矩阵，保存所有压平后的图像数据
+    immatrix = array([array(Image.open(im)).flatten()
+                      for im in imlist], 'f')
+
+    # 执行 PCA 操作
+    V, S, immean = pca(immatrix)
+
+    # 显示一些图像（均值图像和前 7 个模式）
+    figure()
+    gray()
+    subplot(2, 4, 1)
+    imshow(immean.reshape(m, n))
+    for i in range(7):
+        subplot(2, 4, i + 2)
+        imshow(V[i].reshape(m, n))
+
+    show()
+
+
 if __name__ == '__main__':
     # example1()
     # example2()
 
-    im = array(Image.open('../resource/picture/AquaTermi_lowcontrast.jpg').convert('L'))
-    im2, cdf = histeq(im)
-    hist(im2.flatten(), 128)
-    show()
-    imshow(im2)
-    show()
+    # im = array(Image.open('../resource/picture/AquaTermi_lowcontrast.jpg').convert('L'))
+    # im2, cdf = histeq(im)
+    # hist(im2.flatten(), 128)
+    # show()
+    # imshow(im2)
+    # show()
+
+    pcaMain()
