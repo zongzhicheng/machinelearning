@@ -392,6 +392,7 @@ def rigid_alignment(faces, path, plotflag=False):
         imageio.imwrite(os.path.join('aligned/' + face), im2[border:h - border, border:w - border, :])
 
 
+# 图像配准
 def main4():
     xmlFileName = '../resource/picture/jkfaces.xml'
     points = read_points_from_xml(xmlFileName)
