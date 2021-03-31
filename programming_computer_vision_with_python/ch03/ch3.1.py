@@ -9,7 +9,6 @@ import os
 # from xml.dom import minidom
 # 就很烦，这个包找不到...
 import defusedxml.minidom as minidom
-import programming_computer_vision_with_python.ch03.sift as sift
 
 
 def normalize(points):
@@ -401,25 +400,9 @@ def main4():
     rigid_alignment(points, '../resource/picture/jkfaces/')
 
 
-# 使用SIFT特征自动找到匹配对应
-def main5():
-    featname = ['Univ' + str(i + 1) + '.sift' for i in range(5)]
-    imname = ['Univ' + str(i + 1) + '.jpg' for i in range(5)]
-    l = {}
-    d = {}
-    for i in range(5):
-        sift.process_image(imname[i], featname[i])
-        l[i], d[i] = sift.read_features_from_file(featname[i])
-
-    matches = {}
-    for i in range(4):
-        matches[i] = sift.match(d[i + 1], d[i])
-
-
 if __name__ == '__main__':
     # main1()
     # main2()
     # simpleTriangulation()
     # main3()
-    # main4()
-    main5()
+    main4()
