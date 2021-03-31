@@ -1,7 +1,14 @@
 from PIL import Image
 from pylab import *
 from numpy import *
+from scipy.spatial import Delaunay
+from scipy import linalg
 from scipy import ndimage
+import imageio
+import os
+# from xml.dom import minidom
+# 就很烦，这个包找不到...
+import defusedxml.minidom as minidom
 
 
 def normalize(points):
@@ -181,14 +188,220 @@ def alpha_for_triangle(points, m, n):
     :return:
     """
     alpha = zeros((m, n))
-    for i in range(min(points[0]), max(points[0])):
-        for j in range(min(points[1]), max(points[1])):
+    for i in range(int(min(points[0])), int(max(points[0]))):
+        for j in range(int(min(points[1])), int(max(points[1]))):
             x = linalg.solve(points, [i, j, 1])
             if min(x) > 0:  # 所有系数都大于零
                 alpha[i, j] = 1
     return alpha
 
 
+def simpleTriangulation():
+    """
+    三角剖分示例
+    :return:
+    """
+    x, y = array(random.standard_normal((2, 100)))
+    tri = Delaunay(np.c_[x, y]).simplices
+
+    figure()
+    for t in tri:
+        t_ext = [t[0], t[1], t[2], t[0]]  # 将第一个点加入到最后
+        plot(x[t_ext], y[t_ext], 'r')
+
+    plot(x, y, '*')
+    axis('off')
+    show()
+
+
+def triangulate_points(x, y):
+    """
+     二维点的 Delaunay 三角剖分
+    :param x:
+    :param y:
+    :return:
+    """
+    tri = Delaunay(np.c_[x, y]).simplices
+    return tri
+
+
+def pw_affine(fromim, toim, fp, tp, tri):
+    """
+    从一幅图像中扭曲矩形图像块
+    :param fromim: 将要扭曲的图像
+    :param toim: 目标图像
+    :param fp: 齐次坐标表示下，扭曲前的点
+    :param tp: 齐次坐标表示下，扭曲后的点
+    :param tri: 三角剖分
+    :return:
+    """
+
+    im = toim.copy()
+
+    # 检查图像是灰度图像还是彩色图象
+    is_color = len(fromim.shape) == 3
+
+    # 创建扭曲后的图像（如果需要对彩色图像的每个颜色通道进行迭代操作，那么有必要这样做）
+    im_t = zeros(im.shape, 'uint8')
+
+    for t in tri:
+        # 计算仿射变换
+        H = Haffine_from_points(tp[:, t], fp[:, t])
+
+        if is_color:
+            for col in range(fromim.shape[2]):
+                im_t[:, :, col] = ndimage.affine_transform(
+                    fromim[:, :, col], H[:2, :2], (H[0, 2], H[1, 2]), im.shape[:2])
+        else:
+            im_t = ndimage.affine_transform(
+                fromim, H[:2, :2], (H[0, 2], H[1, 2]), im.shape[:2])
+
+        # 三角形的alpha
+        alpha = alpha_for_triangle(tp[:, t], im.shape[0], im.shape[1])
+
+        # 将三角形加入到图像中
+        im[alpha > 0] = im_t[alpha > 0]
+
+    return im
+
+
+def plot_mesh(x, y, tri):
+    """
+    绘制三角形
+    :param x:
+    :param y:
+    :param tri:
+    :return:
+    """
+    for t in tri:
+        t_ext = [t[0], t[1], t[2], t[0]]  # 将第一个点加入到最后
+        plot(x[t_ext], y[t_ext], 'r')
+
+
+# 分段仿射扭曲
+def main3():
+    # 打开图像，并将其扭曲
+    fromim = array(Image.open('../resource/picture/sunset_tree.jpg'))
+    x, y = meshgrid(range(5), range(6))
+    x = (fromim.shape[1] / 4) * x.flatten()
+    y = (fromim.shape[0] / 5) * y.flatten()
+
+    # 三角剖分
+    tri = triangulate_points(x, y)
+
+    # 打开图像和目标点
+    im = array(Image.open('../resource/picture/turningtorso1.jpg'))
+    tp = loadtxt('../resource/picture/turningtorso1_points.txt')
+
+    # 将点转换成齐次坐标
+    fp = vstack((y, x, ones((1, len(x)))))
+    tp = vstack((tp[:, 1], tp[:, 0], ones((1, len(tp)))))
+
+    # 扭曲三角形
+    im = pw_affine(fromim, im, fp, tp, tri)
+
+    # 绘制图像
+    figure()
+    imshow(im)
+    plot_mesh(tp[1], tp[0], tri)
+    axis('off')
+    show()
+
+
+def read_points_from_xml(xmlFileName):
+    """
+    读取用于人脸对齐的控制点
+    :param xmlFileName:
+    :return:
+    """
+    xmldoc = minidom.parse(xmlFileName)
+    facelist = xmldoc.getElementsByTagName('face')
+    faces = {}
+    for xmlFace in facelist:
+        fileName = xmlFace.attributes['file'].value
+        xf = int(xmlFace.attributes['xf'].value)
+        yf = int(xmlFace.attributes['yf'].value)
+        xs = int(xmlFace.attributes['xs'].value)
+        ys = int(xmlFace.attributes['ys'].value)
+        xm = int(xmlFace.attributes['xm'].value)
+        ym = int(xmlFace.attributes['ym'].value)
+        faces[fileName] = array([xf, yf, xs, ys, xm, ym])
+    return faces
+
+
+def compute_rigid_transform(refpoints, points):
+    """
+    计算用于将点对齐到参考点的旋转、尺度和平移量
+    :param refpoints:
+    :param points:
+    :return:
+    """
+    A = array([[points[0], -points[1], 1, 0],
+               [points[1], points[0], 0, 1],
+               [points[2], -points[3], 1, 0],
+               [points[3], points[2], 0, 1],
+               [points[4], -points[5], 1, 0],
+               [points[5], points[4], 0, 1]])
+
+    y = array([refpoints[0],
+               refpoints[1],
+               refpoints[2],
+               refpoints[3],
+               refpoints[4],
+               refpoints[5]])
+
+    # 计算最小化||Ax -y || 的最小二乘解
+    a, b, tx, ty = linalg.lstsq(A, y)[0]
+    R = array([[a, -b], [b, a]])  # 包含尺度的旋转矩阵
+
+    return R, tx, ty
+
+
+def rigid_alignment(faces, path, plotflag=False):
+    """ 严格对齐图像，并将其保存为新的图像
+      path 决定对齐后图像保存的位置
+      设置plotflag=True，以绘制图像"""
+
+    # 将第一幅图像中的点作为参考点
+    refpoints = list(faces.values())[0]
+
+    # 使用仿射变换扭曲每幅图像
+    for face in faces:
+        points = faces[face]
+        R, tx, ty = compute_rigid_transform(refpoints, points)
+        T = array([[R[1][1], R[1][0]], [R[0][1], R[0][0]]])
+
+        im = array(Image.open(os.path.join(path, face)))
+        im2 = zeros(im.shape, 'uint8')
+
+        # 对每个颜色通道进行扭曲
+        for i in range(len(im.shape)):
+            im2[:, :, i] = ndimage.affine_transform(im[:, :, i], linalg.inv(T), offset=[-ty, -tx])
+
+        if plotflag:
+            imshow(im2)
+            show()
+
+        # 裁剪边界，并保存对齐后的图像
+        h, w = im2.shape[:2]
+        border = (w + h) // 20
+
+        # 裁剪边界
+        # imsave(os.path.join(path, 'aligned/'+face),im2[border:h-border,border:w-border,:])
+        # misc.imsave已经被弃用了 使用新的API接口imageio解决
+        imageio.imwrite(os.path.join('aligned/' + face), im2[border:h - border, border:w - border, :])
+
+
+def main4():
+    xmlFileName = '../resource/picture/jkfaces.xml'
+    points = read_points_from_xml(xmlFileName)
+    # 注册
+    rigid_alignment(points, '../resource/picture/jkfaces/')
+
+
 if __name__ == '__main__':
     # main1()
-    main2()
+    # main2()
+    # simpleTriangulation()
+    # main3()
+    main4()
