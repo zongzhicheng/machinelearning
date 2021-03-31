@@ -149,6 +149,11 @@ def image_in_image(im1, im2, tp):
 
 
 def main2():
+    """
+    仿射扭曲的一个简单例子：
+    将图像或图像的一部分放置在另一幅图像中，使得它们能够和指定的区域或者标记物对齐
+    :return:
+    """
     # 仿射扭曲im1 到im2 的例子
     im1 = array(Image.open('../resource/picture/beatles.jpg').convert('L'))
     im2 = array(Image.open('../resource/picture/billboard_for_rent.jpg').convert('L'))
@@ -164,6 +169,24 @@ def main2():
     axis('equal')
     axis('off')
     show()
+
+
+def alpha_for_triangle(points, m, n):
+    """
+    对于带有由points 定义角点的三角形，创建大小为(m，n) 的alpha 图
+    （在归一化的齐次坐标意义下）
+    :param points:
+    :param m:
+    :param n:
+    :return:
+    """
+    alpha = zeros((m, n))
+    for i in range(min(points[0]), max(points[0])):
+        for j in range(min(points[1]), max(points[1])):
+            x = linalg.solve(points, [i, j, 1])
+            if min(x) > 0:  # 所有系数都大于零
+                alpha[i, j] = 1
+    return alpha
 
 
 if __name__ == '__main__':
