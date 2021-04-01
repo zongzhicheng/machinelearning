@@ -5,6 +5,7 @@ from PCV.tools import imtools, pca
 from PCV.clustering import hcluster
 import pickle
 from scipy.cluster.vq import *
+import cv2
 
 
 def main1():
@@ -118,7 +119,87 @@ def main3():
     show()
 
 
+def clusterpixels(infile, k, steps):
+    # 图像被划分成steps x steps的区域
+    im = array(Image.open(infile))
+    dx = im.shape[0] // steps
+    dy = im.shape[1] // steps
+
+    # 计算每个区域的颜色特征
+    features = []
+    for x in range(steps):
+        for y in range(steps):
+            R = mean(im[x * dx:(x + 1) * dx, y * dy:(y + 1) * dy, 0])
+            G = mean(im[x * dx:(x + 1) * dx, y * dy:(y + 1) * dy, 1])
+            B = mean(im[x * dx:(x + 1) * dx, y * dy:(y + 1) * dy, 2])
+            features.append([R, G, B])
+    features = array(features, 'f')  # 变为数组
+
+    # 聚类
+    centroids, variance = kmeans(features, k)
+    code, distance = vq(features, centroids)
+
+    codeim = code.reshape(steps, steps)
+    # codeim = imresize(codeim, im.shape[:2], 'nearest')
+    # 我他妈的真是无语了，scipy.misc.imresize模块早就被移除了
+    # cv2.resize可以实现同样的效果
+    codeim = cv2.resize(src=codeim, dsize=im.shape[:2], interpolation=cv2.INTER_NEAREST)
+    return codeim
+
+
+def main4():
+    k = 3
+    infile_empire = '../resource/picture/empire.jpg'
+    infile_boy_on_hill = '../resource/picture/boy_on_hill.jpg'
+    im_empire = array(Image.open('../resource/picture/empire.jpg'))
+    im_boy_on_hill = array(Image.open('../resource/picture/boy_on_hill.jpg'))
+
+    # 显示原图empire.jpg
+    figure()
+    # 231代表2行3列第1个
+    subplot(231)
+    title('empire.jpg')
+    axis('off')
+    imshow(im_empire)
+
+    # 用50*50的块对empire.jpg的像素进行聚类
+    codeim = clusterpixels(infile_empire, k, 50)
+    subplot(232)
+    title('k=3,steps=50')
+    axis('off')
+    imshow(codeim)
+
+    # 用100*100的块对empire.jpg的像素进行聚类
+    codeim = clusterpixels(infile_empire, k, 100)
+    subplot(233)
+    title('k=3,steps=100')
+    axis('off')
+    imshow(codeim)
+
+    # 显示原图empire.jpg
+    subplot(234)
+    title('boy_on_hill.jpg')
+    axis('off')
+    imshow(im_boy_on_hill)
+
+    # 用50*50的块对empire.jpg的像素进行聚类
+    codeim = clusterpixels(infile_boy_on_hill, k, 50)
+    subplot(235)
+    title('k=3,steps=50')
+    axis('off')
+    imshow(codeim)
+
+    # 用100*100的块对empire.jpg的像素进行聚类
+    codeim = clusterpixels(infile_boy_on_hill, k, 100)
+    subplot(236)
+    title('k=3，steps=100')
+    axis('off')
+    imshow(codeim)
+    show()
+
+
 if __name__ == '__main__':
     # main1()
     # main2()
-    main3()
+    # main3()
+    main4()
