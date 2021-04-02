@@ -4,76 +4,10 @@ from numpy import *
 import pickle
 from PCV.tools.imtools import get_imlist
 from PCV.localdescriptors import sift
-from scipy.cluster.vq import *
 import os
 import programming_computer_vision_with_python.ch07.imagesearch as imagesearch
+import programming_computer_vision_with_python.ch07.Vocabulary as Vocabulary
 import sqlite3 as sqlite
-
-
-class Vocabulary(object):
-
-    def __init__(self, name):
-        self.name = name
-        self.voc = []
-        self.idf = []
-        self.trainingdata = []
-        self.nbr_words = 0
-
-    def train(self, featurefiles, k=100, subsampling=10):
-        """
-        用含有k个单词的K-means列出在featurefiles中的特征文件训练出一个词汇。
-        对训练数据下采样可以加快训练速度
-        :param featurefiles:
-        :param k:
-        :param subsampling:
-        :return:
-        """
-
-        nbr_images = len(featurefiles)
-        # 从文件中读取特征
-        descr = []
-        descr.append(sift.read_features_from_file(featurefiles[0])[1])
-        descriptors = descr[0]  # 将所有的特征并在一起，以便后面进行K-means聚类
-        for i in arange(1, nbr_images):
-            descr.append(sift.read_features_from_file(featurefiles[i])[1])
-            descriptors = vstack((descriptors, descr[i]))
-
-        # k-means: 最后一个参数决定运行次数
-        self.voc, distortion = kmeans(descriptors[::subsampling, :], k, 1)
-        self.nbr_words = self.voc.shape[0]
-
-        # 遍历所有的训练图像，并投影到词汇上
-        imwords = zeros((nbr_images, self.nbr_words))
-        for i in range(nbr_images):
-            imwords[i] = self.project(descr[i])
-
-        nbr_occurences = sum((imwords > 0) * 1, axis=0)
-
-        self.idf = log((1.0 * nbr_images) / (1.0 * nbr_occurences + 1))
-        self.trainingdata = featurefiles
-
-    def project(self, descriptors):
-        """
-        将描述子投影到词汇上，以创建单词直方图
-        :param descriptors:
-        :return:
-        """
-
-        # 图像单词直方图
-        imhist = zeros((self.nbr_words))
-        words, distance = vq(descriptors, self.voc)
-        for w in words:
-            imhist[w] += 1
-
-        return imhist
-
-    def get_words(self, descriptors):
-        """
-        将描述符转换为词语
-        :param descriptors:
-        :return:
-        """
-        return vq(descriptors, self.voc)[0]
 
 
 def process_image(imagename, resultname, params="--edge-thresh 10 --peak-thresh 5"):
@@ -119,7 +53,7 @@ def main2():
     # 获取特征列表
     featlist = [imlist[i][:-3] + 'sift' for i in range(nbr_images)]
     # 生成词汇
-    voc = Vocabulary('ukbenchtest')
+    voc = Vocabulary.Vocabulary('ukbenchtest')
     startTime = time.time()
     print('train begin')
     voc.train(featlist, 1000, 10)
@@ -160,7 +94,62 @@ def main3():
     print(con.execute('select * from imlist').fetchone())
 
 
+def main4():
+    # 获取图像列表
+    imlist = get_imlist('../resource/picture/first1000/')
+    nbr_images = len(imlist)
+    # 获取特征列表
+    featlist = [imlist[i][:-3] + 'sift' for i in range(nbr_images)]
+    # 载入词汇
+    with open('../resource/picture/first1000/vocabulary.pkl', 'rb') as f:
+        voc = pickle.load(f)
+    src = imagesearch.Searcher('test.db', voc)
+    locs, descr = sift.read_features_from_file(featlist[0])
+    iw = voc.project(descr)
+
+    print('ask using a histogram...')
+    result_1 = src.candidates_from_histogram(iw)[:10]
+    print(result_1)
+
+
+def main5():
+    # 获取图像列表
+    imlist = get_imlist('../resource/picture/first1000/')
+    nbr_images = len(imlist)
+    # 获取特征列表
+    featlist = [imlist[i][:-3] + 'sift' for i in range(nbr_images)]
+    # 载入词汇
+    with open('../resource/picture/first1000/vocabulary.pkl', 'rb') as f:
+        voc = pickle.load(f)
+    src = imagesearch.Searcher('test.db', voc)
+    print('try a query...')
+    print(src.query(imlist[0])[:10])
+
+
+def main6():
+    # 获取图像列表
+    imlist = get_imlist('../resource/picture/first1000/')
+    nbr_images = len(imlist)
+    # 获取特征列表
+    featlist = [imlist[i][:-3] + 'sift' for i in range(nbr_images)]
+    # 载入词汇
+    with open('../resource/picture/first1000/vocabulary.pkl', 'rb') as f:
+        voc = pickle.load(f)
+    src = imagesearch.Searcher('test.db', voc)
+    result = imagesearch.compute_ukbench_score(src, imlist[:200])
+    print(result)
+
+    nbr_result = 20
+    res = [w[1] for w in src.query(imlist[0])[:nbr_result]]
+    imagesearch.plot_results(src, res)
+
+
 if __name__ == '__main__':
     # main1()
-    # main2()
-    main3()
+    main2()
+    # main3()
+    # 就离谱，代码一样，结果不一样
+    # TODO：暂未找到原因
+    # main4()
+    # main5()
+    # main6()

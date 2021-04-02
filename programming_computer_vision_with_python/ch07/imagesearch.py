@@ -1,5 +1,8 @@
 import sqlite3 as sqlite
 import pickle
+from PIL import Image
+from pylab import *
+from numpy import *
 
 
 class Indexer(object):
@@ -83,3 +86,126 @@ class Indexer(object):
         self.con.execute('create index imid_idx on imwords(imid)')
         self.con.execute('create index imidhist_idx on imhistograms(imid)')
         self.db_commit()
+
+
+class Searcher(object):
+
+    def __init__(self, db, voc):
+        """初始化数据库的名称"""
+        self.con = sqlite.connect(db)
+        self.voc = voc
+
+    def __del__(self):
+        self.con.close()
+
+    def get_imhistogram(self, imname):
+        """
+        返回一幅图像的单词直方图
+        :param imname:
+        :return:
+        """
+        im_id = self.con.execute(
+            "select rowid from imlist where filename='%s'" % imname).fetchone()
+        s = self.con.execute(
+            "select histogram from imhistograms where rowid='%d'" % im_id).fetchone()
+
+        # 用pickle模块从字符串解码Numpy数组
+        return pickle.loads(s[0])
+
+    def candidates_from_word(self, imword):
+        """
+        获取包含imword的图像列表
+        :param imword:
+        :return:
+        """
+        im_ids = self.con.execute(
+            "select distinct imid from imwords where wordid=%d" % imword).fetchall()
+        return [i[0] for i in im_ids]
+
+    def candidates_from_histogram(self, imwords):
+        """
+        获取具有相似单词的图像列表
+        :param imwords:
+        :return:
+        """
+        # 获取单词id
+        words = imwords.nonzero()[0]
+
+        # 寻找候选图像
+        candidates = []
+        for word in words:
+            c = self.candidates_from_word(word)
+            candidates += c
+
+        # 获取所有唯一的单词，并按出现次数反向排序
+        tmp = [(w, candidates.count(w)) for w in set(candidates)]
+        # tmp.sort(cmp=lambda x, y: cmp(x[1], y[1]))
+        # cmp已经不能用了..
+        tmp.sort(key=lambda x: x[1])
+        tmp.reverse()
+
+        # 返回排序后的列表，最匹配的排在最前面
+        return [w[0] for w in tmp]
+
+    def query(self, imname):
+        """
+        查找所有与imname匹配的图像列表
+        :param imname:
+        :return:
+        """
+        h = self.get_imhistogram(imname)
+        candidates = self.candidates_from_histogram(h)
+
+        matchscores = []
+        for imid in candidates:
+            # 获取名字
+            cand_name = self.con.execute(
+                "select filename from imlist where rowid=%d" % imid).fetchone()
+            cand_h = self.get_imhistogram(cand_name)
+            cand_dist = sqrt(sum(self.voc.idf * (h - cand_h) ** 2))
+            matchscores.append((cand_dist, imid))
+
+        # 返回排序后的距离及对应数据库ids列表
+        matchscores.sort()
+        return matchscores
+
+    def get_filename(self, imid):
+        """返回图像id对应的文件名"""
+        s = self.con.execute(
+            "select filename from imlist where rowid='%d'" % imid).fetchone()
+        return s[0]
+
+
+def compute_ukbench_score(src, imlist):
+    """
+    对查询返回的前4个结果计算平均相似图像数，并返回结果
+    :param src:
+    :param imlist:
+    :return:
+    """
+    nbr_images = len(imlist)
+    pos = zeros((nbr_images, 4))
+    # 获取每幅查询图像的前4个结果
+    for i in range(nbr_images):
+        pos[i] = [w[1] - 1 for w in src.query(imlist[i])[:4]]
+
+    # 计算分数，并返回平均分数
+    score = array([(pos[i] // 4) == (i // 4) for i in range(nbr_images)]) * 1.0
+    return sum(score) / (nbr_images)
+
+
+def plot_results(src, res):
+    """
+    显示在列表res中的图像
+    :param src:
+    :param res:
+    :return:
+    """
+    figure()
+    nbr_results = len(res)
+    for i in range(nbr_results):
+        imname = src.get_filename(res[i])
+        subplot(1, nbr_results, i + 1)
+        imshow(array(Image.open(imname)))
+        axis('off')
+    show()
