@@ -6,7 +6,8 @@ from PCV.tools.imtools import get_imlist
 from PCV.localdescriptors import sift
 from scipy.cluster.vq import *
 import os
-import sqlite3
+import programming_computer_vision_with_python.ch07.imagesearch as imagesearch
+import sqlite3 as sqlite
 
 
 class Vocabulary(object):
@@ -130,11 +131,36 @@ def main2():
     print('vocabulary is:', voc.name, voc.nbr_words)
 
 
+# 遍历每个ukbench数据库中的样本图像，并将其加入我们的索引
 def main3():
+    # 获取图像列表
+    imlist = get_imlist('../resource/picture/first1000/')
+    nbr_images = len(imlist)
+    # 获取特征列表
+    featlist = [imlist[i][:-3] + 'sift' for i in range(nbr_images)]
+
+    # 载入词汇
     with open('../resource/picture/first1000/vocabulary.pkl', 'rb') as f:
         voc = pickle.load(f)
+
+    # 创建索引表
+    indx = imagesearch.Indexer('test.db', voc)
+    indx.create_tables()
+
+    # 遍历整个图像库，将特征投影到词汇上并添加到索引中
+    for i in range(nbr_images)[:1000]:
+        locs, descr = sift.read_features_from_file(featlist[i])
+        indx.add_to_index(imlist[i], descr)
+
+    # 提交到数据库
+    indx.db_commit()
+
+    con = sqlite.connect('test.db')
+    print(con.execute('select count(filename) from imlist').fetchone())
+    print(con.execute('select * from imlist').fetchone())
 
 
 if __name__ == '__main__':
     # main1()
-    main2()
+    # main2()
+    main3()
