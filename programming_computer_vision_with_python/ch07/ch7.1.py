@@ -130,6 +130,10 @@ def main2():
     print('vocabulary is:', voc.name, voc.nbr_words)
 
 
+def main3():
+    with open('../resource/picture/first1000/vocabulary.pkl', 'rb') as f:
+        voc = pickle.load(f)
+
 
 if __name__ == '__main__':
     # main1()

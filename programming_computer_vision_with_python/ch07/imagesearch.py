@@ -5,9 +5,7 @@ import pickle
 class Indexer(object):
 
     def __init__(self, db, voc):
-        """ Initialize with the name of the database
-            and a vocabulary object. """
-
+        """初始化数据库的名称及词汇对象"""
         self.con = sqlite.connect(db)
         self.voc = voc
 
@@ -18,8 +16,11 @@ class Indexer(object):
         self.con.commit()
 
     def get_id(self, imname):
-        """ Get an entry id and add if not present. """
-
+        """
+        获取图像id，如果不存在，就进行添加
+        :param imname:
+        :return:
+        """
         cur = self.con.execute(
             "select rowid from imlist where filename='%s'" % imname)
         res = cur.fetchone()
@@ -31,35 +32,43 @@ class Indexer(object):
             return res[0]
 
     def is_indexed(self, imname):
-        """ Returns True if imname has been indexed. """
-
+        """
+        如果图像名字（imname）被索引到，就返回True
+        :param imname:
+        :return:
+        """
         im = self.con.execute("select rowid from imlist where filename='%s'" % imname).fetchone()
         return im != None
 
     def add_to_index(self, imname, descr):
-        """ Take an image with feature descriptors,
-            project on vocabulary and add to database. """
-
-        if self.is_indexed(imname): return
+        """
+        获取一幅带有特征描述子的图像，投影到词汇上并添加到数据库
+        :param imname:
+        :param descr:
+        :return:
+        """
+        if self.is_indexed(imname):
+            return
         print('indexing', imname)
 
-        # get the imid
+        # 获取图像id
         imid = self.get_id(imname)
 
-        # get the words
+        # 获取单词
         imwords = self.voc.project(descr)
         nbr_words = imwords.shape[0]
 
-        # link each word to image
+        # 将每个单词与图像链接起来
         for i in range(nbr_words):
             word = imwords[i]
-            # wordid is the word number itself
-            self.con.execute("insert into imwords(imid,wordid,vocname) values (?,?,?)", (imid, word, self.voc.name))
+            # wordid就是单词本身的数字
+            self.con.execute("insert into imwords(imid,wordid,vocname) values(?, ?, ?)",
+                             (imid, word, self.voc.name))
 
-        # store word histogram for image
-        # use pickle to encode NumPy arrays as strings
-        self.con.execute("insert into imhistograms(imid,histogram,vocname) values (?,?,?)",
-                         (imid, pickle.dumps(imwords), self.voc.name))
+            # 存储图像的单词直方图
+            # 用pickle模块将Numpy数组编码成字符串
+            self.con.execute("insert into imhistograms(imid,histogram,vocname) values (?,?,?)",
+                             (imid, pickle.dumps(imwords), self.voc.name))
 
     def create_tables(self):
         """
