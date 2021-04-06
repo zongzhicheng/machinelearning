@@ -77,8 +77,8 @@ class SearchDemo(object):
             res = self.src.query(query)[:self.maxres]
             for dist, ndx in res:
                 imname = self.src.get_filename(ndx)
-                html += "<a href='?query=" + imname + "'>"
-                html += "<img src='" + imname + "' width='200' />"
+                html += "<a href='?query=" + imname + ">"
+                html += "<img src=file:" + imname + " width='200' />"
                 html += "</a>"
         else:
             # 如果没有查询图像则随机显示一些图像
@@ -86,7 +86,7 @@ class SearchDemo(object):
             for i in self.ndx[:self.maxres]:
                 imname = self.imlist[i]
                 html += "<a href='?query=" + imname + ">"
-                html += "<img src=" + imname + " width='200' />"
+                html += "<img src=file:" + imname + " width='200' />"
                 html += "</a>"
 
         html += self.footer
