@@ -237,6 +237,7 @@ def main3():
 
     show()
 
+    # 保存照相机矩阵
     with open('ar_camera.pkl', 'wb') as f:
         pickle.dumps(K, 3)
         pickle.dump(dot(linalg.inv(K), cam2.P), f)
