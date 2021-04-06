@@ -147,7 +147,12 @@ setup()
 draw_background('../resource/picture/book_perspective.bmp')
 set_projection_from_camera(K)
 set_modelview_from_camera(Rt)
-# TODO 到这个地方会出现闪退 暂未解决
+# 到这个地方会出现闪退
+# 编译运行会报错：freeglut ERROR: Function <glutSolidTeapot> called without first calling 'glutInit'.）
+# 这是因为freeglut和glut共存且定义了相同的方法，存在动态链接库重叠问题。
+# 解决方案：
+# 进入安装OpenGL相关路径 例如：D:\anaconda3\envs\TF_2C\Lib\site-packages\OpenGL\DLLS
+# 删掉freeglut64.vc14.dll和gle64.vc14.dll，留下glut64.vc14.dll
 draw_teapot(0.02)
 
 while True:
