@@ -154,7 +154,7 @@ set_modelview_from_camera(Rt)
 # 进入安装OpenGL相关路径 例如：D:\anaconda3\envs\TF_2C\Lib\site-packages\OpenGL\DLLS
 # 删掉freeglut64.vc14.dll和gle64.vc14.dll，留下glut64.vc14.dll
 # 参考链接：https://blog.csdn.net/weixin_43837871/article/details/89057837
-draw_teapot(0.02)
+draw_teapot(0.5)
 
 while True:
     event = pygame.event.poll()
