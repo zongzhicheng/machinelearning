@@ -64,7 +64,8 @@ def main2():
     # 准确率
     acc = sum(1.0 * (res == test_labels)) / len(test_labels)
     print('Accuracy:', acc)
-    print_confusion(res,test_labels,classnames)
+    print_confusion(res, test_labels, classnames)
+
 
 def print_confusion(res, test_labels, classnames):
     n = len(classnames)
