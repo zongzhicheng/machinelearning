@@ -1,12 +1,10 @@
-from PIL import Image
-from pylab import *
-from numpy import *
 import os
-import programming_computer_vision_with_python.ch08.dsift as dsift
-import programming_computer_vision_with_python.ch08.knn as knn
 
 from PCV.localdescriptors import sift
-from PCV.tools import imtools
+from numpy import *
+
+import programming_computer_vision_with_python.ch08.dsift as dsift
+import programming_computer_vision_with_python.ch08.knn as knn
 
 
 # 对每一辐图像创建一个特征文件
