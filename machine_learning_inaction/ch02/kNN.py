@@ -1,8 +1,9 @@
-# 《机器学习实战》
-# k-近邻算法
-# --------------------------------
-# ---------- 2020.12.30 ----------
-# --------------------------------
+#####################################
+#                                   #
+#               knn                 #
+#                                   #
+#####################################
+
 from os import listdir
 
 from numpy import *
@@ -17,9 +18,15 @@ def createDataSet():
     return group, labels
 
 
-# k-近邻算法
-# 输入参数：用于分类的输入向量inX、输入的训练样本集dataSet、标签向量labels、参数k表示选择最近邻居的数目
 def classify0(inX, dataSet, labels, k):
+    """
+    k-近邻算法
+    :param inX: 用于分类的输入向量
+    :param dataSet: 输入的训练样本集
+    :param labels: 标签向量
+    :param k: 选择最近邻居的数目
+    :return:
+    """
     dataSetSize = dataSet.shape[0]
     # 欧氏距离计算
     # tile([0,0], [4,1]) => 4行一列 [[0,0],[0,0],[0,0],[0,0]]

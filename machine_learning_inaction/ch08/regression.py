@@ -49,8 +49,7 @@ def lwlr(testPoint, xArr, yArr, k=1.0):
         weights[j, j] = exp(diffMat * diffMat.T / (-2.0 * k ** 2))
     xTx = xMat.T * (weights * xMat)
     if linalg.det(xTx) == 0.0:
-        print
-        "This matrix is singular, cannot do inverse"
+        print("This matrix is singular, cannot do inverse")
         return
     ws = xTx.I * (xMat.T * (weights * yMat))
     return testPoint * ws
