@@ -148,7 +148,8 @@ if __name__ == '__main__':
             optimizer.zero_grad()
             loss.backward()
             optimizer.step()
-            loss_batch.append(loss.data.cpu().numpy())
+            # loss_batch.append(loss.data.cpu().numpy())
+            loss_batch.append(loss.item())
         # writer.add_scalar('sh300_loss', loss, step)
         # GPU tensor 转换成 Numpy 变量的时候，需要先将 tensor 转换到 CPU
         loss_list.append(np.mean(loss_batch))
